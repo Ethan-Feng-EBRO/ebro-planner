@@ -336,7 +336,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="header-actions">
             <button class="btn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.4)" onclick="exportAnalysis()" data-i18n="btn.exportAnalysis">导出分析</button>
             <button class="btn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.4)" onclick="exportPlan()" data-i18n="btn.exportPlan">导出计划</button>
-            <button class="btn" style="background:rgba(168,85,247,0.9);color:white;border:1px solid rgba(168,85,247,0.6)" onclick="generateOnlineReport()" data-i18n="btn.onlineReport">🌐 生成在线报告</button>
+            <button class="btn" style="background:rgba(168,85,247,0.9);color:white;border:1px solid rgba(168,85,247,0.6)" onclick="syncOnlineData()" data-i18n="btn.onlineReport">🌐 同步在线数据</button>
             <button class="btn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.4)" onclick="clearState()" data-i18n="btn.clearData">清除数据</button>
             <div class="lang-switcher">
                 <button class="lang-btn active" onclick="setLanguage('zh')">CN</button>
@@ -623,7 +623,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             'btn.exportPlan': '导出计划',
 
             'btn.clearData': '清除数据',
-            'btn.onlineReport': '🌐 生成在线报告',
+            'btn.onlineReport': '🌐 同步在线数据',
             'import.title': '📂 导入数据文件',
             'import.hint': '选择一个或多个Excel文件上传，系统自动识别文件类型。也可手动指定类型后上传。',
             'import.dropZone': '📁 点击选择文件 或 拖拽文件到此处',
@@ -830,7 +830,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             'btn.exportPlan': 'Export Plan',
 
             'btn.clearData': 'Clear Data',
-            'btn.onlineReport': '🌐 Generate Online Report',
+            'btn.onlineReport': '🌐 Sync Online Data',
             'import.title': '📂 Import Data Files',
             'import.hint': 'Select one or more Excel files to upload. The system will auto-detect file types. You can also manually specify types.',
             'import.dropZone': '📁 Click to select files or drag files here',
@@ -1026,7 +1026,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             'btn.exportPlan': 'Exportar Plan',
 
             'btn.clearData': 'Borrar Datos',
-            'btn.onlineReport': '🌐 Generar Informe en Línea',
+            'btn.onlineReport': '🌐 Sincronizar Datos en Línea',
             'import.title': '📂 Importar Archivos de Datos',
             'import.hint': 'Seleccione uno o más archivos Excel para cargar. El sistema detectará automáticamente los tipos de archivo.',
             'import.dropZone': '📁 Haga clic para seleccionar archivos o arrástrelos aquí',
@@ -1462,58 +1462,75 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
     // ==================== ONLINE REPORT ====================
     
-    function generateOnlineReport() {
+    async function syncOnlineData() {
         if (S.loaded.size === 0) {
             alert('请先导入数据');
             return;
         }
         
-        if (!confirm('确定要生成在线报告并上传到腾讯云吗？\n\n这将覆盖当前的在线报告，所有访问链接的用户将看到最新数据。')) {
+        if (!confirm('确定要同步在线数据吗？\n\n这将更新 GitHub Pages 上的数据，所有访问链接的用户将看到最新数据。')) {
             return;
         }
         
         showLoading();
         
         try {
-            // 生成包含所有数据的独立HTML文件
-            const reportData = {
-                version: '1.0',
-                generatedAt: new Date().toISOString(),
-                master: S.master,
-                stock: S.stock,
-                stockDesc: S.stockDesc || {},
-                bo: S.bo,
-                boSnapshots: S.boSnapshots,
-                salesMonthly: S.salesMonthly,
-                salesDealer: S.salesDealer,
-                shipment: S.shipment,
-                inTransitCalc: S.inTransitCalc,
-                orderMonthly: S.orderMonthly,
-                shipMonthly: S.shipMonthly,
-                orderTypes: S.orderTypes,
-                loaded: [...S.loaded]
-            };
+            // GitHub API 配置
+            const GITHUB_TOKEN = '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';
+            const GITHUB_OWNER = 'Ethan-Feng-EBRO';
+            const GITHUB_REPO = 'ebro-planner';
+            const GITHUB_FILE = 'index.html';
+            const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
             
-            // 生成HTML内容
-            const htmlContent = generateReportHTML(reportData);
+            // 1. 获取当前文件的 SHA
+            const getResponse = await fetch(`${API_BASE}/contents/${GITHUB_FILE}`, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
             
-            // 创建Blob并下载
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'EBRO_Report_' + new Date().toISOString().slice(0, 10) + '.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            if (!getResponse.ok) {
+                throw new Error('获取文件信息失败: ' + getResponse.status);
+            }
             
-            alert('✅ 在线报告已生成并下载！\n\n请手动上传到GitHub Pages或分享给同事。');
+            const fileInfo = await getResponse.json();
+            const currentSha = fileInfo.sha;
+            
+            // 2. 读取当前页面的完整 HTML
+            const htmlContent = document.documentElement.outerHTML;
+            
+            // 3. 将内容转为 Base64
+            const base64Content = btoa(unescape(encodeURIComponent(htmlContent)));
+            
+            // 4. 更新文件
+            const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            const putResponse = await fetch(`${API_BASE}/contents/${GITHUB_FILE}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `Sync online data - ${timestamp}`,
+                    content: base64Content,
+                    sha: currentSha
+                })
+            });
+            
+            if (!putResponse.ok) {
+                const errorData = await putResponse.json();
+                throw new Error('更新文件失败: ' + (errorData.message || putResponse.status));
+            }
+            
+            hideLoading();
+            alert('✅ 在线数据已同步！\n\nGitHub Pages 将在 1-2 分钟内更新。\n\n访问链接：\nhttps://ethan-feng-ebro.github.io/ebro-planner/');
             
         } catch (err) {
-            console.error('Generate report error:', err);
+            console.error('Sync error:', err);
             hideLoading();
-            alert('生成报告失败: ' + err.message);
+            alert('同步失败: ' + err.message);
         }
     }
     
