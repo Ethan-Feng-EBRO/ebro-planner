@@ -1468,64 +1468,25 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             return;
         }
         
-        if (!confirm('确定要同步在线数据吗？\n\n这将更新 GitHub Pages 上的数据，所有访问链接的用户将看到最新数据。')) {
-            return;
-        }
-        
         showLoading();
         
         try {
-            // GitHub Token (base64 encoded to bypass secret scanning)
-            const GITHUB_TOKEN = atob('Z2hwX0dFak5KUGRKQkxGUndQelFzeklJdHV6Vmc3dUZSRTBOMklxVQ==');
-            const GITHUB_OWNER = 'Ethan-Feng-EBRO';
-            const GITHUB_REPO = 'ebro-planner';
-            const GITHUB_FILE = 'index.html';
-            const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
+            // 读取当前页面的完整 HTML
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
             
-            // 1. 获取当前文件的 SHA
-            const getResponse = await fetch(`${API_BASE}/contents/${GITHUB_FILE}`, {
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-            
-            if (!getResponse.ok) {
-                throw new Error('获取文件信息失败: ' + getResponse.status);
-            }
-            
-            const fileInfo = await getResponse.json();
-            const currentSha = fileInfo.sha;
-            
-            // 2. 读取当前页面的完整 HTML
-            const htmlContent = document.documentElement.outerHTML;
-            
-            // 3. 将内容转为 Base64
-            const base64Content = btoa(unescape(encodeURIComponent(htmlContent)));
-            
-            // 4. 更新文件
-            const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            const putResponse = await fetch(`${API_BASE}/contents/${GITHUB_FILE}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: `Sync online data - ${timestamp}`,
-                    content: base64Content,
-                    sha: currentSha
-                })
-            });
-            
-            if (!putResponse.ok) {
-                const errorData = await putResponse.json();
-                throw new Error('更新文件失败: ' + (errorData.message || putResponse.status));
-            }
+            // 创建Blob并下载
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
             
             hideLoading();
-            alert('✅ 在线数据已同步！\n\nGitHub Pages 将在 1-2 分钟内更新。\n\n访问链接：\nhttps://ethan-feng-ebro.github.io/ebro-planner/');
+            alert('✅ 文件已下载！\n\n请双击运行 deploy.bat 自动同步到 GitHub Pages。\n\n文件位置：D:\\Ada-WorkSpace\\ebro-parts-planner\\deploy.bat\n\nGitHub Pages 将在 1-2 分钟后更新。');
             
         } catch (err) {
             console.error('Sync error:', err);
