@@ -2992,7 +2992,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     // 自动加载 data.json（在妙搭缓存恢复之后执行）
     (function() {
         window.addEventListener('load', function() {
-            // 延迟 2 秒，确保妙搭本地缓存已恢复
+            // 延迟 3 秒，确保妙搭本地缓存已恢复
             setTimeout(function() {
                 // 使用绝对路径，避免被妙搭缓存修改
                 var baseUrl = window.location.origin + window.location.pathname;
@@ -3004,6 +3004,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                     })
                     .then(function(d) {
                         if (!d || typeof S === 'undefined') return;
+                        
+                        // 强制覆盖妙搭缓存的数据
                         S.master = new Map(d.master || []);
                         S.stock = new Map(d.stock || []);
                         S.stockDesc = d.stockDesc || {};
@@ -3029,14 +3031,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                             try { if (typeof renderBOHistory === 'function') renderBOHistory(); } catch(e) { console.error('renderBOHistory:', e); }
                             try { if (typeof renderBOTable === 'function') renderBOTable(); } catch(e) { console.error('renderBOTable:', e); }
                             try { if (typeof renderPlan === 'function') renderPlan(); } catch(e) { console.error('renderPlan:', e); }
-                            console.log('Data restored from data.json');
+                            console.log('✅ Data restored from data.json');
                         }, 500);
                     })
                     .catch(function(err) {
                         console.log('No data.json found, using cached data');
                         if (typeof hideLoading === 'function') hideLoading();
                     });
-            }, 2000);
+            }, 3000);
         });
     })();
     
