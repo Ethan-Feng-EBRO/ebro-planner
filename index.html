@@ -3025,12 +3025,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                         
                         // 延迟渲染，确保 DOM 已准备好
                         setTimeout(function() {
+                            try { if (typeof recalculate === 'function') recalculate(); } catch(e) { console.error('recalculate:', e); }
                             try { if (typeof renderAnalysis === 'function') renderAnalysis(); } catch(e) { console.error('renderAnalysis:', e); }
                             try { if (typeof renderCharts === 'function') renderCharts(); } catch(e) { console.error('renderCharts:', e); }
                             try { if (typeof renderBOStats === 'function') renderBOStats(); } catch(e) { console.error('renderBOStats:', e); }
                             try { if (typeof renderBOHistory === 'function') renderBOHistory(); } catch(e) { console.error('renderBOHistory:', e); }
                             try { if (typeof renderBOTable === 'function') renderBOTable(); } catch(e) { console.error('renderBOTable:', e); }
                             try { if (typeof renderPlan === 'function') renderPlan(); } catch(e) { console.error('renderPlan:', e); }
+                            try { if (typeof updateImportSummary === 'function') updateImportSummary(); } catch(e) { console.error('updateImportSummary:', e); }
                             console.log('✅ Data restored from data.json');
                         }, 500);
                     })
