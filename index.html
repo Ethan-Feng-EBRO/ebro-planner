@@ -2998,8 +2998,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         showLoading();
         
         try {
-            // 收集当前页面的所有数据
-            var dataToEmbed = {
+            // 收集数据
+            var dataToSave = {
                 master: Array.from(S.master.entries()),
                 stock: Array.from(S.stock.entries()),
                 stockDesc: S.stockDesc || {},
@@ -3012,68 +3012,42 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 orderMonthly: S.orderMonthly || {},
                 shipMonthly: S.shipMonthly || {},
                 orderTypes: S.orderTypes || {},
-                loaded: Array.from(S.loaded)
+                loaded: Array.from(S.loaded),
+                updatedAt: new Date().toISOString()
             };
             
-            // 读取当前页面的完整 HTML
-            var htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            // 下载 data.json
+            var jsonBlob = new Blob([JSON.stringify(dataToSave)], { type: 'application/json;charset=utf-8' });
+            var jsonUrl = URL.createObjectURL(jsonBlob);
+            var jsonA = document.createElement('a');
+            jsonA.href = jsonUrl;
+            jsonA.download = 'data.json';
+            document.body.appendChild(jsonA);
+            jsonA.click();
+            document.body.removeChild(jsonA);
+            URL.revokeObjectURL(jsonUrl);
             
-            // 构建数据加载脚本（用字符串拼接避免 <\/script> 被浏览器误解析）
-            var dataJson = JSON.stringify(dataToEmbed);
-            var scriptStart = '<scr' + 'ipt>';
-            var scriptEnd = '<\/scr' + 'ipt>';
-            var dataScript = scriptStart + '\n' +
-                '(function(){\n' +
-                'var d=' + dataJson + ';\n' +
-                'window.addEventListener("load",function(){\n' +
-                'try{\n' +
-                'if(typeof S!=="undefined"){\n' +
-                'S.master=new Map(d.master||[]);\n' +
-                'S.stock=new Map(d.stock||[]);\n' +
-                'S.stockDesc=d.stockDesc||{};\n' +
-                'S.bo=new Map(d.bo||[]);\n' +
-                'S.boSnapshots=d.boSnapshots||[];\n' +
-                'S.salesMonthly=d.salesMonthly||{};\n' +
-                'S.salesDealer=d.salesDealer||{};\n' +
-                'S.shipment=new Map(d.shipment||[]);\n' +
-                'S.inTransitCalc=d.inTransitCalc||{};\n' +
-                'S.orderMonthly=d.orderMonthly||{};\n' +
-                'S.shipMonthly=d.shipMonthly||{};\n' +
-                'S.orderTypes=d.orderTypes||{};\n' +
-                'S.loaded=new Set(d.loaded||[]);\n' +
-                'if(typeof hideLoading==="function")hideLoading();\n' +
-                'setTimeout(function(){\n' +
-                'try{if(typeof renderAll==="function")renderAll();}catch(e){}\n' +
-                'try{if(typeof hideLoading==="function")hideLoading();}catch(e){}\n' +
-                '},300);\n' +
-                'console.log("Data loaded");\n' +
-                '}\n' +
-                '}catch(e){console.error(e);try{hideLoading();}catch(e2){}}\n' +
-                '});\n' +
-                '})();\n' +
-                scriptEnd;
-            
-            // 在 </body> 前注入数据脚本
-            if (htmlContent.indexOf('</body>') !== -1) {
-                htmlContent = htmlContent.replace('</body>', dataScript + '\n</body>');
-            } else {
-                htmlContent = htmlContent + '\n' + dataScript;
+            // 下载 index.html（从GitHub获取最新模板）
+            try {
+                var resp = await fetch('https://raw.githubusercontent.com/Ethan-Feng-EBRO/ebro-planner/main/index.html');
+                if (resp.ok) {
+                    var htmlText = await resp.text();
+                    var htmlBlob = new Blob([htmlText], { type: 'text/html;charset=utf-8' });
+                    var htmlUrl = URL.createObjectURL(htmlBlob);
+                    var htmlA = document.createElement('a');
+                    htmlA.href = htmlUrl;
+                    htmlA.download = 'index.html';
+                    document.body.appendChild(htmlA);
+                    htmlA.click();
+                    document.body.removeChild(htmlA);
+                    URL.revokeObjectURL(htmlUrl);
+                }
+            } catch(e) {
+                console.warn('Could not fetch template from GitHub, skipping');
             }
             
-            // 创建Blob并下载
-            var blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            var timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-            a.download = 'index_' + timestamp + '.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
             hideLoading();
-            alert('✅ 文件已下载！\n\n请将下载的文件移动到：\nD:\\Ada-WorkSpace\\ebro-parts-planner\\data_sync\\\n\n然后双击运行 deploy.bat 自动同步到 GitHub Pages。\n\nGitHub Pages 将在 1-2 分钟后更新。');
+            alert('✅ 文件已下载！\n\n请将 data.json 和 index.html 移动到：\nD:\\Ada-WorkSpace\\ebro-parts-planner\\data_sync\\\n\n然后双击 deploy.bat 同步到 GitHub Pages。');
             
         } catch (err) {
             console.error('Sync error:', err);
