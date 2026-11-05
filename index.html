@@ -2897,58 +2897,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     const STORAGE_KEY = 'ebro_parts_data_v1';
 
     function saveState() {
-        try {
-            const stateToSave = {
-                master: S.master,
-                stock: S.stock,
-                bo: S.bo,
-                boSnapshots: S.boSnapshots,
-                salesMonthly: S.salesMonthly,
-                salesDealer: S.salesDealer,
-                shipment: S.shipment,
-                inTransitCalc: S.inTransitCalc,
-                orderMonthly: S.orderMonthly,
-                shipMonthly: S.shipMonthly,
-                orderTypes: S.orderTypes,
-                loaded: [...S.loaded],
-                savedAt: new Date().toISOString(),
-            };
-            const json = JSON.stringify(stateToSave);
-            localStorage.setItem(STORAGE_KEY, json);
-            console.log(`数据已保存 (${(json.length / 1024 / 1024).toFixed(2)} MB)`);
-        } catch (e) {
-            console.error('保存失败:', e);
-            if (e.name === 'QuotaExceededError') {
-                alert('数据量过大，无法保存到本地存储。请减少数据量或清除旧数据后重试。');
-            }
-        }
+        // GitHub 版本不保存数据到 localStorage
+        console.log('GitHub: saveState disabled');
     }
 
     function loadState() {
-        try {
-            const json = localStorage.getItem(STORAGE_KEY);
-            if (!json) return false;
-
-            const state = JSON.parse(json);
-            S.master = state.master || {};
-            S.stock = state.stock || {};
-            S.bo = state.bo || {};
-            S.boSnapshots = state.boSnapshots || [];
-            S.salesMonthly = state.salesMonthly || {};
-            S.salesDealer = state.salesDealer || {};
-            S.shipment = state.shipment || {};
-            S.inTransitCalc = state.inTransitCalc || {};
-            S.orderMonthly = state.orderMonthly || {};
-            S.shipMonthly = state.shipMonthly || {};
-            S.orderTypes = state.orderTypes || {};
-            S.loaded = new Set(state.loaded || []);
-
-            console.log(`数据已恢复 (保存于 ${state.savedAt || '未知'})`);
-            return true;
-        } catch (e) {
-            console.error('加载失败:', e);
-            return false;
-        }
+        // GitHub 版本不从 localStorage 加载数据
+        return false;
     }
 
     // ==================== 云端同步 ====================
@@ -5723,24 +5678,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         if (savedLang && i18n[savedLang]) {
             setLanguage(savedLang);
         }
-        
-        // 尝试从本地存储恢复数据
-        if (loadState() && S.loaded.size > 0) {
-            console.log('已恢复上次导入的数据');
-
-            // 更新上传区域状态
-            const fileIcons = {
-                orders: 'upload-orders',
-                shipment: 'upload-shipment',
-                stock: 'upload-stock',
-                sales: 'upload-sales',
-                bo: 'upload-bo',
-                master: 'upload-master'
-            };
-
-            S.loaded.forEach(type => {
-                const el = document.getElementById(fileIcons[type]);
-                if (el) el.classList.add('loaded');
+        // GitHub 版本不从 localStorage 恢复数据
+        console.log('GitHub version: waiting for data.json...');
             });
 
             // 更新导入摘要
