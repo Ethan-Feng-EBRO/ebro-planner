@@ -3044,21 +3044,32 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         showLoading();
         
         try {
-            // 收集数据
+            // 收集数据（兼容 Map 和普通对象）
+            function toEntries(obj) {
+                if (obj instanceof Map) return Array.from(obj.entries());
+                if (obj && typeof obj === 'object') return Object.entries(obj);
+                return [];
+            }
+            function toLoaded(obj) {
+                if (obj instanceof Set) return Array.from(obj);
+                if (Array.isArray(obj)) return obj;
+                return [];
+            }
+            
             var dataToSave = {
-                master: Array.from(S.master.entries()),
-                stock: Array.from(S.stock.entries()),
+                master: toEntries(S.master),
+                stock: toEntries(S.stock),
                 stockDesc: S.stockDesc || {},
-                bo: Array.from(S.bo.entries()),
+                bo: toEntries(S.bo),
                 boSnapshots: S.boSnapshots || [],
                 salesMonthly: S.salesMonthly || {},
                 salesDealer: S.salesDealer || {},
-                shipment: Array.from(S.shipment.entries()),
+                shipment: toEntries(S.shipment),
                 inTransitCalc: S.inTransitCalc || {},
                 orderMonthly: S.orderMonthly || {},
                 shipMonthly: S.shipMonthly || {},
                 orderTypes: S.orderTypes || {},
-                loaded: Array.from(S.loaded),
+                loaded: toLoaded(S.loaded),
                 updatedAt: new Date().toISOString()
             };
             
