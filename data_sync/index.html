@@ -348,8 +348,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <div class="nav-tabs">
         <div class="nav-tab" onclick="switchTab('import', this)" data-i18n="tab.import">📂 数据导入</div>
         <div class="nav-tab" onclick="switchTab('analysis', this)" data-i18n="tab.analysis">📊 运营分析</div>
-        <div class="nav-tab active" onclick="switchTab('plan', this)" data-i18n="tab.plan">📋 月度计划</div>
-        <div class="nav-tab" onclick="switchTab('bo', this)" data-i18n="tab.bo">⚠️ BO管理</div>
+        <div class="nav-tab" onclick="switchTab('plan', this)" data-i18n="tab.plan">📋 月度计划</div>
+        <div class="nav-tab active" onclick="switchTab('bo', this)" data-i18n="tab.bo">⚠️ BO管理</div>
         <div class="nav-tab" onclick="switchTab('settings', this)" data-i18n="tab.settings">⚙️ 参数设置</div>
     </div>
 
@@ -586,7 +586,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         </div>
 
         <!-- ==================== PAGE: PLAN ==================== -->
-        <div id="page-plan" class="page active">
+        <div id="page-plan" class="page">
             <div id="plan-no-data" class="alert alert-warning" style="display: none;">
                 <span data-i18n="plan.noData">⚠️ 请先完成数据导入。Please complete data import first.</span>
             </div>
@@ -738,7 +738,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
 
         <!-- ==================== PAGE: BO MANAGEMENT ==================== -->
-        <div id="page-bo" class="page">
+        <div id="page-bo" class="page active">
             <div id="bo-no-data" class="alert alert-warning" style="display: none;">⚠️ 请先导入BO缺件数据。</div>
             <div id="bo-content" style="display: block;">
                 <!-- BO Stats -->
@@ -5685,4 +5685,4 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     </script>
 
 
-</body></html>
+<div class="alert alert-success" style="position: fixed; top: 80px; right: 20px; z-index: 1000; max-width: 300px; box-shadow: var(--shadow-md);">✅ 已恢复上次导入的数据 <button onclick="this.parentElement.remove()" style="float:right;background:none;border:none;cursor:pointer;font-size:16px">×</button></div></body></html>
