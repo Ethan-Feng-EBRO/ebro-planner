@@ -2992,13 +2992,22 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     // 自动加载 data.json（如果存在）
     (function() {
         window.addEventListener('load', function() {
+            // 5秒超时控制
+            var timeout = setTimeout(function() {
+                if (typeof hideLoading === 'function') hideLoading();
+            }, 5000);
+            
             fetch('data.json?t=' + Date.now())
                 .then(function(resp) {
-                    if (!resp.ok) return;
+                    if (!resp.ok) throw new Error('Not found');
                     return resp.json();
                 })
                 .then(function(d) {
-                    if (!d || typeof S === 'undefined') return;
+                    clearTimeout(timeout);
+                    if (!d || typeof S === 'undefined') {
+                        if (typeof hideLoading === 'function') hideLoading();
+                        return;
+                    }
                     S.master = new Map(d.master || []);
                     S.stock = new Map(d.stock || []);
                     S.stockDesc = d.stockDesc || {};
@@ -3012,7 +3021,6 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                     S.shipMonthly = d.shipMonthly || {};
                     S.orderTypes = d.orderTypes || {};
                     S.loaded = new Set(d.loaded || []);
-                    if (typeof hideLoading === 'function') hideLoading();
                     setTimeout(function() {
                         try { if (typeof renderAll === 'function') renderAll(); } catch(e) {}
                         try { if (typeof hideLoading === 'function') hideLoading(); } catch(e) {}
@@ -3020,6 +3028,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                     console.log('Data loaded from data.json');
                 })
                 .catch(function() {
+                    clearTimeout(timeout);
                     // No data.json, normal operation
                     if (typeof hideLoading === 'function') hideLoading();
                 });
