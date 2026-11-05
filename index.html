@@ -5671,38 +5671,17 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     function showLoading() { document.getElementById('loading').classList.add('show'); }
     function hideLoading() { document.getElementById('loading').classList.remove('show'); }
 
-    // ==================== 页面初始化 ====================
+    // ==================== 页面初始化（GitHub 版本）====================
     window.addEventListener('DOMContentLoaded', function() {
         // 恢复语言设置
         const savedLang = localStorage.getItem('ebro_lang');
         if (savedLang && i18n[savedLang]) {
             setLanguage(savedLang);
         }
-        // GitHub 版本不从 localStorage 恢复数据
+        
+        // GitHub 版本不从 localStorage 恢复数据，数据由 data.json 加载
         console.log('GitHub version: waiting for data.json...');
-            });
-
-            // 更新导入摘要
-            updateImportSummary();
-
-            // 重新计算
-            recalculate();
-            
-            // 更新BO页面
-            if (S.loaded.has('bo')) {
-                updateBOPage();
-            }
-
-            // 显示提示
-            const notice = document.createElement('div');
-            notice.className = 'alert alert-success';
-            notice.style.cssText = 'position:fixed;top:80px;right:20px;z-index:1000;max-width:300px;box-shadow:var(--shadow-md)';
-            notice.innerHTML = '✅ 已恢复上次导入的数据 <button onclick="this.parentElement.remove()" style="float:right;background:none;border:none;cursor:pointer;font-size:16px">×</button>';
-            document.body.appendChild(notice);
-            setTimeout(() => notice.remove(), 5000);
-        }
     });
     </script>
-
-
-<div class="alert alert-success" style="position: fixed; top: 80px; right: 20px; z-index: 1000; max-width: 300px; box-shadow: var(--shadow-md);">✅ 已恢复上次导入的数据 <button onclick="this.parentElement.remove()" style="float:right;background:none;border:none;cursor:pointer;font-size:16px">×</button></div></body></html>
+</body>
+</html>
