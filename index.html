@@ -2961,14 +2961,25 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                         if (!d || typeof S === 'undefined') return;
                         
                         // 强制覆盖妙搭缓存的数据
-                        S.master = new Map(d.master || []);
-                        S.stock = new Map(d.stock || []);
+                        // 将数据恢复为普通对象（不是 Map），确保所有渲染函数正常工作
+                        S.master = {};
+                        (d.master || []).forEach(function(entry) { S.master[entry[0]] = entry[1]; });
+                        
+                        S.stock = {};
+                        (d.stock || []).forEach(function(entry) { S.stock[entry[0]] = entry[1]; });
+                        
                         S.stockDesc = d.stockDesc || {};
-                        S.bo = new Map(d.bo || []);
+                        
+                        S.bo = {};
+                        (d.bo || []).forEach(function(entry) { S.bo[entry[0]] = entry[1]; });
+                        
                         S.boSnapshots = d.boSnapshots || [];
                         S.salesMonthly = d.salesMonthly || {};
                         S.salesDealer = d.salesDealer || {};
-                        S.shipment = new Map(d.shipment || []);
+                        
+                        S.shipment = {};
+                        (d.shipment || []).forEach(function(entry) { S.shipment[entry[0]] = entry[1]; });
+                        
                         S.inTransitCalc = d.inTransitCalc || {};
                         S.orderMonthly = d.orderMonthly || {};
                         S.shipMonthly = d.shipMonthly || {};
