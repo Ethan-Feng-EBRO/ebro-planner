@@ -3016,6 +3016,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             return;
         }
         
+        // 显示当前数据状态，让用户确认
+        const boCount = Object.keys(S.bo || {}).length;
+        const stockCount = Object.keys(S.stock || {}).length;
+        const orderCount = Object.keys(S.orderMonthly || {}).length;
+        const confirmMsg = `当前数据状态：\n\nBO 种类数：${boCount} 个\n库存 SKU 数：${stockCount} 个\n订单 SKU 数：${orderCount} 个\n\n确定要同步这些数据到 GitHub 吗？`;
+        
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+        
         showLoading();
         
         try {
