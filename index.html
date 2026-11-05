@@ -3022,7 +3022,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                     S.orderTypes = d.orderTypes || {};
                     S.loaded = new Set(d.loaded || []);
                     setTimeout(function() {
-                        try { if (typeof renderAll === 'function') renderAll(); } catch(e) {}
+                        try { if (typeof renderAnalysis === 'function') renderAnalysis(); } catch(e) {}
+                        try { if (typeof renderCharts === 'function') renderCharts(); } catch(e) {}
+                        try { if (typeof renderBOStats === 'function') renderBOStats(); } catch(e) {}
+                        try { if (typeof renderBOHistory === 'function') renderBOHistory(); } catch(e) {}
+                        try { if (typeof renderBOTable === 'function') renderBOTable(); } catch(e) {}
+                        try { if (typeof renderPlan === 'function') renderPlan(); } catch(e) {}
                         try { if (typeof hideLoading === 'function') hideLoading(); } catch(e) {}
                     }, 300);
                     console.log('Data loaded from data.json');
