@@ -2897,58 +2897,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     const STORAGE_KEY = 'ebro_parts_data_v1';
 
     function saveState() {
-        try {
-            const stateToSave = {
-                master: S.master,
-                stock: S.stock,
-                bo: S.bo,
-                boSnapshots: S.boSnapshots,
-                salesMonthly: S.salesMonthly,
-                salesDealer: S.salesDealer,
-                shipment: S.shipment,
-                inTransitCalc: S.inTransitCalc,
-                orderMonthly: S.orderMonthly,
-                shipMonthly: S.shipMonthly,
-                orderTypes: S.orderTypes,
-                loaded: [...S.loaded],
-                savedAt: new Date().toISOString(),
-            };
-            const json = JSON.stringify(stateToSave);
-            localStorage.setItem(STORAGE_KEY, json);
-            console.log(`数据已保存 (${(json.length / 1024 / 1024).toFixed(2)} MB)`);
-        } catch (e) {
-            console.error('保存失败:', e);
-            if (e.name === 'QuotaExceededError') {
-                alert('数据量过大，无法保存到本地存储。请减少数据量或清除旧数据后重试。');
-            }
-        }
+        // GitHub 版本不保存数据到 localStorage
+        console.log('GitHub: saveState disabled');
     }
 
     function loadState() {
-        try {
-            const json = localStorage.getItem(STORAGE_KEY);
-            if (!json) return false;
-
-            const state = JSON.parse(json);
-            S.master = state.master || {};
-            S.stock = state.stock || {};
-            S.bo = state.bo || {};
-            S.boSnapshots = state.boSnapshots || [];
-            S.salesMonthly = state.salesMonthly || {};
-            S.salesDealer = state.salesDealer || {};
-            S.shipment = state.shipment || {};
-            S.inTransitCalc = state.inTransitCalc || {};
-            S.orderMonthly = state.orderMonthly || {};
-            S.shipMonthly = state.shipMonthly || {};
-            S.orderTypes = state.orderTypes || {};
-            S.loaded = new Set(state.loaded || []);
-
-            console.log(`数据已恢复 (保存于 ${state.savedAt || '未知'})`);
-            return true;
-        } catch (e) {
-            console.error('加载失败:', e);
-            return false;
-        }
+        // GitHub 版本不从 localStorage 加载数据
+        return false;
     }
 
     // ==================== 云端同步 ====================
@@ -2992,7 +2947,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     // 自动加载 data.json（在妙搭缓存恢复之后执行）
     (function() {
         window.addEventListener('load', function() {
-            // 延迟 2 秒，确保妙搭本地缓存已恢复
+            // 延迟 3 秒，确保妙搭本地缓存已恢复
             setTimeout(function() {
                 // 使用绝对路径，避免被妙搭缓存修改
                 var baseUrl = window.location.origin + window.location.pathname;
@@ -3004,14 +2959,27 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                     })
                     .then(function(d) {
                         if (!d || typeof S === 'undefined') return;
-                        S.master = new Map(d.master || []);
-                        S.stock = new Map(d.stock || []);
+                        
+                        // 强制覆盖妙搭缓存的数据
+                        // 将数据恢复为普通对象（不是 Map），确保所有渲染函数正常工作
+                        S.master = {};
+                        (d.master || []).forEach(function(entry) { S.master[entry[0]] = entry[1]; });
+                        
+                        S.stock = {};
+                        (d.stock || []).forEach(function(entry) { S.stock[entry[0]] = entry[1]; });
+                        
                         S.stockDesc = d.stockDesc || {};
-                        S.bo = new Map(d.bo || []);
+                        
+                        S.bo = {};
+                        (d.bo || []).forEach(function(entry) { S.bo[entry[0]] = entry[1]; });
+                        
                         S.boSnapshots = d.boSnapshots || [];
                         S.salesMonthly = d.salesMonthly || {};
                         S.salesDealer = d.salesDealer || {};
-                        S.shipment = new Map(d.shipment || []);
+                        
+                        S.shipment = {};
+                        (d.shipment || []).forEach(function(entry) { S.shipment[entry[0]] = entry[1]; });
+                        
                         S.inTransitCalc = d.inTransitCalc || {};
                         S.orderMonthly = d.orderMonthly || {};
                         S.shipMonthly = d.shipMonthly || {};
@@ -3023,26 +2991,53 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                         
                         // 延迟渲染，确保 DOM 已准备好
                         setTimeout(function() {
+                            try { if (typeof recalculate === 'function') recalculate(); } catch(e) { console.error('recalculate:', e); }
                             try { if (typeof renderAnalysis === 'function') renderAnalysis(); } catch(e) { console.error('renderAnalysis:', e); }
                             try { if (typeof renderCharts === 'function') renderCharts(); } catch(e) { console.error('renderCharts:', e); }
                             try { if (typeof renderBOStats === 'function') renderBOStats(); } catch(e) { console.error('renderBOStats:', e); }
                             try { if (typeof renderBOHistory === 'function') renderBOHistory(); } catch(e) { console.error('renderBOHistory:', e); }
                             try { if (typeof renderBOTable === 'function') renderBOTable(); } catch(e) { console.error('renderBOTable:', e); }
                             try { if (typeof renderPlan === 'function') renderPlan(); } catch(e) { console.error('renderPlan:', e); }
-                            console.log('Data restored from data.json');
+                            try { if (typeof updateImportSummary === 'function') updateImportSummary(); } catch(e) { console.error('updateImportSummary:', e); }
+                            console.log('✅ Data restored from data.json');
                         }, 500);
                     })
                     .catch(function(err) {
                         console.log('No data.json found, using cached data');
                         if (typeof hideLoading === 'function') hideLoading();
                     });
-            }, 2000);
+            }, 3000);
         });
     })();
     
     async function syncOnlineData() {
         if (S.loaded.size === 0) {
             alert('请先导入数据');
+            return;
+        }
+        
+        // 显示当前所有数据状态，让用户确认
+        const stats = {
+            master: Object.keys(S.master || {}).length,
+            stock: Object.keys(S.stock || {}).length,
+            bo: Object.keys(S.bo || {}).length,
+            shipment: Object.keys(S.shipment || {}).length,
+            salesMonthly: Object.keys(S.salesMonthly || {}).length,
+            orderMonthly: Object.keys(S.orderMonthly || {}).length,
+            boSnapshots: (S.boSnapshots || []).length
+        };
+        
+        const confirmMsg = `当前数据状态：\n\n` +
+            `📦 主数据 (Master): ${stats.master} 个 SKU\n` +
+            `🏭 库存 (Stock): ${stats.stock} 个 SKU\n` +
+            `⚠️ BO 缺件 (BO): ${stats.bo} 个 SKU\n` +
+            `🚢 出运 (Shipment): ${stats.shipment} 个 SKU\n` +
+            `💰 销售月度 (Sales): ${stats.salesMonthly} 个 SKU\n` +
+            `📋 订单月度 (Orders): ${stats.orderMonthly} 个 SKU\n` +
+            `📊 BO 历史快照：${stats.boSnapshots} 期\n\n` +
+            `确定要同步这些数据到 GitHub 吗？`;
+        
+        if (!confirm(confirmMsg)) {
             return;
         }
         
@@ -3078,7 +3073,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 updatedAt: new Date().toISOString()
             };
             
-            // 下载 data.json
+            // 只下载 data.json
             var jsonBlob = new Blob([JSON.stringify(dataToSave)], { type: 'application/json;charset=utf-8' });
             var jsonUrl = URL.createObjectURL(jsonBlob);
             var jsonA = document.createElement('a');
@@ -3089,27 +3084,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             document.body.removeChild(jsonA);
             URL.revokeObjectURL(jsonUrl);
             
-            // 下载 index.html（从GitHub获取最新模板）
-            try {
-                var resp = await fetch('https://raw.githubusercontent.com/Ethan-Feng-EBRO/ebro-planner/main/index.html');
-                if (resp.ok) {
-                    var htmlText = await resp.text();
-                    var htmlBlob = new Blob([htmlText], { type: 'text/html;charset=utf-8' });
-                    var htmlUrl = URL.createObjectURL(htmlBlob);
-                    var htmlA = document.createElement('a');
-                    htmlA.href = htmlUrl;
-                    htmlA.download = 'index.html';
-                    document.body.appendChild(htmlA);
-                    htmlA.click();
-                    document.body.removeChild(htmlA);
-                    URL.revokeObjectURL(htmlUrl);
-                }
-            } catch(e) {
-                console.warn('Could not fetch template from GitHub, skipping');
-            }
-            
             hideLoading();
-            alert('✅ 文件已下载！\n\n请将 data.json 和 index.html 移动到：\nD:\\Ada-WorkSpace\\ebro-parts-planner\\data_sync\\\n\n然后双击 deploy.bat 同步到 GitHub Pages。');
+            alert('✅ data.json 已下载！\n\n请将 data.json 移动到：\nD:\\Ada-WorkSpace\\ebro-parts-planner\\data_sync\\\n\n然后双击 deploy.bat 同步到 GitHub Pages。');
             
         } catch (err) {
             console.error('Sync error:', err);
@@ -5731,7 +5707,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     function showLoading() { document.getElementById('loading').classList.add('show'); }
     function hideLoading() { document.getElementById('loading').classList.remove('show'); }
 
-    // ==================== 页面初始化 ====================
+    // ==================== 页面初始化（GitHub 版本）====================
     window.addEventListener('DOMContentLoaded', function() {
         // 恢复语言设置
         const savedLang = localStorage.getItem('ebro_lang');
@@ -5739,46 +5715,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             setLanguage(savedLang);
         }
         
-        // 尝试从本地存储恢复数据
-        if (loadState() && S.loaded.size > 0) {
-            console.log('已恢复上次导入的数据');
-
-            // 更新上传区域状态
-            const fileIcons = {
-                orders: 'upload-orders',
-                shipment: 'upload-shipment',
-                stock: 'upload-stock',
-                sales: 'upload-sales',
-                bo: 'upload-bo',
-                master: 'upload-master'
-            };
-
-            S.loaded.forEach(type => {
-                const el = document.getElementById(fileIcons[type]);
-                if (el) el.classList.add('loaded');
-            });
-
-            // 更新导入摘要
-            updateImportSummary();
-
-            // 重新计算
-            recalculate();
-            
-            // 更新BO页面
-            if (S.loaded.has('bo')) {
-                updateBOPage();
-            }
-
-            // 显示提示
-            const notice = document.createElement('div');
-            notice.className = 'alert alert-success';
-            notice.style.cssText = 'position:fixed;top:80px;right:20px;z-index:1000;max-width:300px;box-shadow:var(--shadow-md)';
-            notice.innerHTML = '✅ 已恢复上次导入的数据 <button onclick="this.parentElement.remove()" style="float:right;background:none;border:none;cursor:pointer;font-size:16px">×</button>';
-            document.body.appendChild(notice);
-            setTimeout(() => notice.remove(), 5000);
-        }
+        // GitHub 版本不从 localStorage 恢复数据，数据由 data.json 加载
+        console.log('GitHub version: waiting for data.json...');
     });
     </script>
-
-
-<div class="alert alert-success" style="position: fixed; top: 80px; right: 20px; z-index: 1000; max-width: 300px; box-shadow: var(--shadow-md);">✅ 已恢复上次导入的数据 <button onclick="this.parentElement.remove()" style="float:right;background:none;border:none;cursor:pointer;font-size:16px">×</button></div></body></html>
+</body>
+</html>
