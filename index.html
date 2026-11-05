@@ -3080,7 +3080,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 updatedAt: new Date().toISOString()
             };
             
-            // 下载 data.json
+            // 只下载 data.json
             var jsonBlob = new Blob([JSON.stringify(dataToSave)], { type: 'application/json;charset=utf-8' });
             var jsonUrl = URL.createObjectURL(jsonBlob);
             var jsonA = document.createElement('a');
@@ -3091,27 +3091,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             document.body.removeChild(jsonA);
             URL.revokeObjectURL(jsonUrl);
             
-            // 下载 index.html（从GitHub获取最新模板）
-            try {
-                var resp = await fetch('https://raw.githubusercontent.com/Ethan-Feng-EBRO/ebro-planner/main/index.html');
-                if (resp.ok) {
-                    var htmlText = await resp.text();
-                    var htmlBlob = new Blob([htmlText], { type: 'text/html;charset=utf-8' });
-                    var htmlUrl = URL.createObjectURL(htmlBlob);
-                    var htmlA = document.createElement('a');
-                    htmlA.href = htmlUrl;
-                    htmlA.download = 'index.html';
-                    document.body.appendChild(htmlA);
-                    htmlA.click();
-                    document.body.removeChild(htmlA);
-                    URL.revokeObjectURL(htmlUrl);
-                }
-            } catch(e) {
-                console.warn('Could not fetch template from GitHub, skipping');
-            }
-            
             hideLoading();
-            alert('✅ 文件已下载！\n\n请将 data.json 和 index.html 移动到：\nD:\\Ada-WorkSpace\\ebro-parts-planner\\data_sync\\\n\n然后双击 deploy.bat 同步到 GitHub Pages。');
+            alert('✅ data.json 已下载！\n\n请将 data.json 移动到：\nD:\\Ada-WorkSpace\\ebro-parts-planner\\data_sync\\\n\n然后双击 deploy.bat 同步到 GitHub Pages。');
             
         } catch (err) {
             console.error('Sync error:', err);
