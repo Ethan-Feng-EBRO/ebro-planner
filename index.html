@@ -2994,7 +2994,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         window.addEventListener('load', function() {
             // 延迟 2 秒，确保妙搭本地缓存已恢复
             setTimeout(function() {
-                fetch('data.json?t=' + Date.now())
+                // 使用绝对路径，避免被妙搭缓存修改
+                var baseUrl = window.location.origin + window.location.pathname;
+                var dataUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1) + 'data.json?t=' + Date.now();
+                fetch(dataUrl)
                     .then(function(resp) {
                         if (!resp.ok) throw new Error('Not found');
                         return resp.json();
