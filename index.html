@@ -2998,22 +2998,108 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         showLoading();
         
         try {
+            // 收集当前页面的所有数据
+            const dataToEmbed = {
+                master: Array.from(S.master.entries()),
+                stock: Array.from(S.stock.entries()),
+                stockDesc: S.stockDesc || {},
+                bo: Array.from(S.bo.entries()),
+                boSnapshots: S.boSnapshots || [],
+                salesMonthly: S.salesMonthly || {},
+                salesDealer: S.salesDealer || {},
+                shipment: Array.from(S.shipment.entries()),
+                inTransitCalc: S.inTransitCalc || {},
+                orderMonthly: S.orderMonthly || {},
+                shipMonthly: S.shipMonthly || {},
+                orderTypes: S.orderTypes || {},
+                loaded: [...S.loaded]
+            };
+            
             // 读取当前页面的完整 HTML
-            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            let htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            
+            // 在 </head> 前注入数据加载脚本
+            const dataScript = `
+<script>
+// 自动加载嵌入的数据
+(function() {
+    try {
+        const embeddedData = ${JSON.stringify(dataToEmbed)};
+        
+        // 等待页面加载完成后注入数据
+        window.addEventListener('load', function() {
+            try {
+                if (typeof S !== 'undefined') {
+                    // 恢复数据到S对象
+                    S.master = new Map(embeddedData.master || []);
+                    S.stock = new Map(embeddedData.stock || []);
+                    S.stockDesc = embeddedData.stockDesc || {};
+                    S.bo = new Map(embeddedData.bo || []);
+                    S.boSnapshots = embeddedData.boSnapshots || [];
+                    S.salesMonthly = embeddedData.salesMonthly || {};
+                    S.salesDealer = embeddedData.salesDealer || {};
+                    S.shipment = new Map(embeddedData.shipment || []);
+                    S.inTransitCalc = embeddedData.inTransitCalc || {};
+                    S.orderMonthly = embeddedData.orderMonthly || {};
+                    S.shipMonthly = embeddedData.shipMonthly || {};
+                    S.orderTypes = embeddedData.orderTypes || {};
+                    S.loaded = new Set(embeddedData.loaded || []);
+                    
+                    // 强制隐藏加载状态
+                    if (typeof hideLoading === 'function') {
+                        hideLoading();
+                    }
+                    
+                    // 触发界面更新
+                    if (typeof renderAll === 'function') {
+                        setTimeout(function() {
+                            try {
+                                renderAll();
+                            } catch(e) {
+                                console.error('Render error:', e);
+                            }
+                            // 再次确保隐藏加载状态
+                            if (typeof hideLoading === 'function') {
+                                hideLoading();
+                            }
+                        }, 100);
+                    }
+                    
+                    console.log('✅ 嵌入数据已加载');
+                }
+            } catch(e) {
+                console.error('Data restoration error:', e);
+                if (typeof hideLoading === 'function') {
+                    hideLoading();
+                }
+            }
+        });
+    } catch(e) {
+        console.error('Script injection error:', e);
+    }
+})();
+</script>
+`;
+            
+            htmlContent = htmlContent.replace('</head>', dataScript + '</head>');
             
             // 创建Blob并下载
             const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'index.html';
+            
+            // 生成带时间戳的文件名
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            a.download = `index_${timestamp}.html`;
+            
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
             hideLoading();
-            alert('✅ 文件已下载！\n\n请双击运行 deploy.bat 自动同步到 GitHub Pages。\n\n文件位置：D:\\Ada-WorkSpace\\ebro-parts-planner\\deploy.bat\n\nGitHub Pages 将在 1-2 分钟后更新。');
+            alert('✅ 文件已下载！\n\n请将下载的文件移动到：\nD:\\Ada-WorkSpace\\ebro-parts-planner\\data_sync\\\n\n然后双击运行 deploy.bat 自动同步到 GitHub Pages。\n\nGitHub Pages 将在 1-2 分钟后更新。');
             
         } catch (err) {
             console.error('Sync error:', err);
