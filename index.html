@@ -2989,6 +2989,43 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
     // ==================== ONLINE REPORT ====================
     
+    // 自动加载 data.json（如果存在）
+    (function() {
+        window.addEventListener('load', function() {
+            fetch('data.json?t=' + Date.now())
+                .then(function(resp) {
+                    if (!resp.ok) return;
+                    return resp.json();
+                })
+                .then(function(d) {
+                    if (!d || typeof S === 'undefined') return;
+                    S.master = new Map(d.master || []);
+                    S.stock = new Map(d.stock || []);
+                    S.stockDesc = d.stockDesc || {};
+                    S.bo = new Map(d.bo || []);
+                    S.boSnapshots = d.boSnapshots || [];
+                    S.salesMonthly = d.salesMonthly || {};
+                    S.salesDealer = d.salesDealer || {};
+                    S.shipment = new Map(d.shipment || []);
+                    S.inTransitCalc = d.inTransitCalc || {};
+                    S.orderMonthly = d.orderMonthly || {};
+                    S.shipMonthly = d.shipMonthly || {};
+                    S.orderTypes = d.orderTypes || {};
+                    S.loaded = new Set(d.loaded || []);
+                    if (typeof hideLoading === 'function') hideLoading();
+                    setTimeout(function() {
+                        try { if (typeof renderAll === 'function') renderAll(); } catch(e) {}
+                        try { if (typeof hideLoading === 'function') hideLoading(); } catch(e) {}
+                    }, 300);
+                    console.log('Data loaded from data.json');
+                })
+                .catch(function() {
+                    // No data.json, normal operation
+                    if (typeof hideLoading === 'function') hideLoading();
+                });
+        });
+    })();
+    
     async function syncOnlineData() {
         if (S.loaded.size === 0) {
             alert('请先导入数据');
